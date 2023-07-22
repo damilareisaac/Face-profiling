@@ -22,11 +22,12 @@ def get_profile(frame):
     if len(face_locations) > 0:
         for face_location in face_locations:
             x0, y1, x1, y0 = face_location
-            face_features["bbx_frontal_face"] = np.array([y0, x0, y1, x1])
             face_image = frame[x0:x1, y0:y1]
 
-            predicted_age = age_model.predict_age(face_image)
-            face_features["age"] = int(predicted_age)
+            face_features["bbx_frontal_face"] = np.array([y0, x0, y1, x1])
+            face_features["name"] = face_rec.recognize_face2(frame, [face_location])
+            face_features["age"] = int(age_model.predict_age(face_image))
+
     else:
         face_features["bbx_frontal_face"] = []
     profiles.append(face_features)
