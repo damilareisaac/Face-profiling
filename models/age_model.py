@@ -14,17 +14,16 @@ class AgeModel:
 
     def load_model(self):
         model = VGGFace.baseModel()
-        # --------------------------
+
         classes = 101
         base_model_output = Convolution2D(classes, (1, 1), name="predictions")(
             model.layers[-4].output
         )
         base_model_output = Flatten()(base_model_output)
         base_model_output = Activation("softmax")(base_model_output)
-        # --------------------------
+
         age_model = Model(inputs=model.input, outputs=base_model_output)
-        # --------------------------
-        # load weights
+
         age_model.load_weights(AGE_MODEL_WEIGHT_PATH)
         return age_model
 
