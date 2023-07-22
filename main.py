@@ -1,5 +1,5 @@
 from typing import Any, List
-import face_recognition
+import f_face_recognition
 import cv2
 import imutils
 import time
@@ -10,19 +10,20 @@ from config import FONT_SIZE, STEP, TEXT_THICKNESS
 cv2.namedWindow("Image Profile")
 camera = cv2.VideoCapture(0)
 
+face_rec = f_face_recognition.rec()
+
 
 def get_profile(frame):
     profiles = []
     face_features = {
         "bbx_frontal_face": [],
     }
-    face_locations = face_recognition.face_locations(frame)
+    face_locations = face_rec.detect_face(frame)
     if len(face_locations) > 0:
         for face_location in face_locations:
             x0, y1, x1, y0 = face_location
-            bbx_frontal_face = np.array([y0, x0, y1, x1])
 
-            face_features["bbx_frontal_face"] = bbx_frontal_face  # type: ignore
+            face_features["bbx_frontal_face"] = np.array([y0, x0, y1, x1])  # type: ignore
     profiles.append(face_features)
     return profiles
 
