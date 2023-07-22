@@ -1,0 +1,7 @@
+deepface
+face-recognition
+face-recognition-models
+imutils
+Keras
+Keras-Preprocessing
+opencv-python
