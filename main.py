@@ -4,26 +4,31 @@ import cv2
 import imutils
 import time
 import numpy as np
-
+from models import AgeModel
 from config import FONT_SIZE, STEP, TEXT_THICKNESS
 
 cv2.namedWindow("Image Profile")
 camera = cv2.VideoCapture(0)
 
 face_rec = f_face_recognition.rec()
+age_model = AgeModel()
 
 
 def get_profile(frame):
     profiles = []
-    face_features = {
-        "bbx_frontal_face": [],
-    }
+    face_features = dict()
+
     face_locations = face_rec.detect_face(frame)
     if len(face_locations) > 0:
         for face_location in face_locations:
             x0, y1, x1, y0 = face_location
+            face_features["bbx_frontal_face"] = np.array([y0, x0, y1, x1])
+            face_image = frame[x0:x1, y0:y1]
 
-            face_features["bbx_frontal_face"] = np.array([y0, x0, y1, x1])  # type: ignore
+            predicted_age = age_model.predict_age(face_image)
+            face_features["age"] = int(predicted_age)
+    else:
+        face_features["bbx_frontal_face"] = []
     profiles.append(face_features)
     return profiles
 

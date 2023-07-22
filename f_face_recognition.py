@@ -154,21 +154,3 @@ def bounding_box(img, box, match_name=[]):
                 2,
             )
     return img
-
-
-if __name__ == "__main__":
-    import argparse
-
-    parse = argparse.ArgumentParser()
-    parse.add_argument("-im", "--path_im", help="path image")
-    parse = parse.parse_args()
-
-    path_im = parse.path_im
-    im = cv2.imread(path_im)
-    # instancio detector
-    recognizer = rec()
-    res = recognizer.recognize_face(im)
-    im = bounding_box(im, res["faces"], res["names"])
-    cv2.imshow("face recogntion", im)
-    cv2.waitKey(0)
-    print(res)
