@@ -4,7 +4,7 @@ import cv2
 import imutils
 import time
 import numpy as np
-from models import AgeModel
+from models import AgeModel, GenderModel
 from config import FONT_SIZE, STEP, TEXT_THICKNESS
 
 cv2.namedWindow("Image Profile")
@@ -12,6 +12,7 @@ camera = cv2.VideoCapture(0)
 
 face_rec = f_face_recognition.rec()
 age_model = AgeModel()
+gender_model = GenderModel()
 
 
 def get_profile(frame):
@@ -27,6 +28,7 @@ def get_profile(frame):
             face_features["bbx_frontal_face"] = np.array([y0, x0, y1, x1])
             face_features["name"] = face_rec.recognize_face2(frame, [face_location])
             face_features["age"] = int(age_model.predict_age(face_image))
+            face_features["gender"] = gender_model.predict_gender(face_image)
 
     else:
         face_features["bbx_frontal_face"] = []

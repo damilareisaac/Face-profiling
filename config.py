@@ -9,3 +9,4 @@ TEXT_THICKNESS = 1
 IMAGE_DIR = BASE_DIR / "images_db"
 MODEL_PATH = BASE_DIR / "model_weights"
 AGE_MODEL_WEIGHT_PATH = MODEL_PATH / "age_model_weights.h5"
+GENDER_MODEL_WEIGHT_PATH = MODEL_PATH / "gender_model_weights.h5"
