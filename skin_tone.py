@@ -10,34 +10,29 @@ from arg_parser.input_parser import build_arguments
 from config import TONE_BLACK_WHITE, TONE_COLOURS
 from utils import alphabet_id
 
+args = build_arguments()
+verbose = args.debug
+
+image_type_setting = args.image_type
+to_bw: bool = args.black_white
+default_tone_palette = dict(color=TONE_COLOURS, bw=TONE_BLACK_WHITE)
+specified_palette: list[str] = args.palette if args.palette is not None else []
+default_tone_labels = {
+    "color": ["C" + alphabet_id(i) for i in range(len(default_tone_palette["color"]))],
+    "bw": ["B" + alphabet_id(i) for i in range(len(default_tone_palette["bw"]))],
+}
+
+specified_tone_labels = args.labels
+new_width = args.new_width
+n_dominant_colors = args.n_colors
+min_size = args.min_size[:2]
+scale = args.scale
+min_nbrs = args.min_nbrs
+
 
 def process_image(filename):
-    args = build_arguments()
-    image_type_setting = args.image_type
-    to_bw: bool = args.black_white
-    default_tone_palette = dict(color=TONE_COLOURS, bw=TONE_BLACK_WHITE)
-    specified_palette: list[str] = args.palette if args.palette is not None else []
-    default_tone_labels = {
-        "color": [
-            "C" + alphabet_id(i) for i in range(len(default_tone_palette["color"]))
-        ],
-        "bw": ["B" + alphabet_id(i) for i in range(len(default_tone_palette["bw"]))],
-    }
-    verbose = args.debug
-    specified_tone_labels = args.labels
-    new_width = args.new_width
-    n_dominant_colors = args.n_colors
-    min_size = args.min_size[:2]
-    scale = args.scale
-    min_nbrs = args.min_nbrs
-
-    for idx, ct in enumerate(specified_palette):
-        if not ct.startswith("#") and len(ct.split(",")) == 3:
-            r, g, b = ct.split(",")
-            specified_palette[idx] = "#%02X%02X%02X" % (int(r), int(g), int(b))
-
+    update_specified_palette(specified_palette)
     basename, extension = filename.stem, filename.suffix
-
     image: np.ndarray = cv2.imread(str(filename.resolve()), cv2.IMREAD_COLOR)
     if image is None:
         msg = f"{basename}.{extension} is not found or is not a valid image."
@@ -94,6 +89,13 @@ def process_image(filename):
             "extension": extension,
             "message": msg,
         }
+
+
+def update_specified_palette(specified_palette):
+    for idx, ct in enumerate(specified_palette):
+        if not ct.startswith("#") and len(ct.split(",")) == 3:
+            r, g, b = ct.split(",")
+            specified_palette[idx] = "#%02X%02X%02X" % (int(r), int(g), int(b))
 
 
 def create_color_bar(height, width, color):
