@@ -45,3 +45,12 @@ TONE_BLACK_WHITE = [
     "#101010",
     "#000000",
 ]
+
+VALID_IMAGES = [
+    "*.jpg",
+    "*.gif",
+    "*.png",
+    "*.jpeg",
+    "*.webp",
+    "*.tif",
+]

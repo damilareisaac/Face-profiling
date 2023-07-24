@@ -1,16 +1,12 @@
 import os
 from functools import partial
 from config import TONE_BLACK_WHITE, TONE_COLOURS
-from .utils import (
-    process_image,
-    alphabet_id,
-    build_filenames,
-)
+from utils import alphabet_id, build_filenames_from_paths
 from arg_parser import build_arguments
 import numpy as np
 from tqdm import tqdm
 
-print("Running STONE MAIN...")
+from .image import process_image
 
 
 def patch_asscalar(a):
@@ -22,7 +18,7 @@ setattr(np, "asscalar", patch_asscalar)
 
 def main():
     args = build_arguments()
-    filenames = build_filenames(args.images)
+    filenames = build_filenames_from_paths(args.images)
     debug: bool = args.debug
     to_bw: bool = args.black_white
     default_tone_palette = dict(color=TONE_COLOURS, bw=TONE_BLACK_WHITE)

@@ -1,5 +1,6 @@
 import logging
 import math
+import sys
 
 import cv2
 import numpy as np
@@ -8,6 +9,81 @@ from colormath.color_diff import delta_e_cie2000
 from colormath.color_objects import sRGBColor, LabColor
 
 LOG = logging.getLogger(__name__)
+
+
+def process_image(
+    filename,
+    image_type_setting,
+    specified_palette,
+    default_palette,
+    specified_tone_labels,
+    default_tone_labels,
+    to_bw,
+    new_width,
+    n_dominant_colors,
+    scale,
+    min_nbrs,
+    min_size,
+    verbose,
+):
+    basename, extension = filename.stem, filename.suffix
+
+    image: np.ndarray = cv2.imread(str(filename.resolve()), cv2.IMREAD_COLOR)
+    if image is None:
+        msg = f"{basename}.{extension} is not found or is not a valid image."
+        print(msg, file=sys.stderr)
+        return {
+            "basename": basename,
+            "extension": extension,
+            "message": msg,
+        }
+    is_bw = is_black_white(image)
+    image_type = image_type_setting
+    if image_type == "auto":
+        image_type = "bw" if is_bw else "color"
+    if len(specified_palette) == 0:
+        skin_tone_palette = default_palette["bw" if to_bw or is_bw else "color"]
+    else:
+        skin_tone_palette = specified_palette
+
+    tone_labels = (
+        specified_tone_labels
+        or default_tone_labels["bw" if to_bw or is_bw else "color"]
+    )
+    if len(skin_tone_palette) != len(tone_labels):
+        raise ValueError(
+            "argument -p/--palette and -l/--labels must have the same length."
+        )
+
+    try:
+        records, report_images = process(
+            image,
+            is_bw,
+            to_bw,
+            skin_tone_palette,
+            tone_labels,
+            new_width=new_width,
+            n_dominant_colors=n_dominant_colors,
+            scaleFactor=scale,
+            minNeighbors=min_nbrs,
+            minSize=min_size,
+            verbose=verbose,
+        )
+        return {
+            "basename": basename,
+            "extension": extension,
+            "image_type": image_type,
+            "records": records,
+            "report_images": report_images,
+        }
+    except Exception as e:
+        msg = f"Error processing image {basename}: {str(e)}"
+        print(msg, file=sys.stderr)
+        return {
+            "basename": basename,
+            "extension": extension,
+            "message": msg,
+        }
 
 
 def create_color_bar(height, width, color):
