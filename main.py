@@ -1,4 +1,5 @@
 from typing import Any, List
+from arg_parser import build_arguments
 import f_face_recognition
 import cv2
 import imutils
@@ -9,7 +10,7 @@ from config import FONT_SIZE, STEP, TEXT_THICKNESS
 from skin_tone.main import main as skin_tone
 
 cv2.namedWindow("Image Profile")
-camera = cv2.VideoCapture(0)
+
 
 face_rec = f_face_recognition.rec()
 age_model = AgeModel()
@@ -65,29 +66,43 @@ def add_rectangular_profile_box_to_face(profiles: List[Any], frame):
         return frame
 
 
-skin_tone()
+args = build_arguments()
+type_input = args.input
 
-while True:
-    start_time = time.time()
-    ret, frame = camera.read()
-    frame = imutils.resize(frame, width=720)
+if type_input == "image":
+    for image in args.images:
+        frame = cv2.imread(image)
+        profiles = get_profile(frame)
+        annotated_images = add_rectangular_profile_box_to_face(profiles, frame)
+        cv2.imshow("Face info", annotated_images)
 
-    end_time = time.time() - start_time
-    FPS = 1 / end_time
+    skin_tone()
+    cv2.waitKey(0)
 
-    profiles = get_profile(frame)
-    annotated_images = add_rectangular_profile_box_to_face(profiles, frame)
 
-    cv2.putText(
-        frame,
-        f"FPS: {round(FPS,3)}",
-        (10, 50),
-        cv2.FONT_HERSHEY_COMPLEX,
-        1,
-        (0, 0, 255),
-        2,
-    )
-    cv2.imshow("Face info", frame)
+if type_input == "webcam":
+    camera = cv2.VideoCapture(0)
+    while True:
+        start_time = time.time()
+        ret, frame = camera.read()
+        frame = imutils.resize(frame, width=720)
 
-    if cv2.waitKey(1) & 0xFF == ord("q"):
-        break
+        end_time = time.time() - start_time
+        FPS = 1 / end_time
+
+        profiles = get_profile(frame)
+        annotated_images = add_rectangular_profile_box_to_face(profiles, frame)
+
+        cv2.putText(
+            frame,
+            f"FPS: {round(FPS,3)}",
+            (10, 50),
+            cv2.FONT_HERSHEY_COMPLEX,
+            1,
+            (0, 0, 255),
+            2,
+        )
+        cv2.imshow("Face info", frame)
+
+        if cv2.waitKey(1) & 0xFF == ord("q"):
+            break

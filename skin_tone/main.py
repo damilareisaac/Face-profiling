@@ -3,10 +3,10 @@ from functools import partial
 from config import TONE_BLACK_WHITE, TONE_COLOURS
 from .utils import (
     process_image,
-    build_arguments,
     alphabet_id,
     build_filenames,
 )
+from arg_parser import build_arguments
 import numpy as np
 from tqdm import tqdm
 
