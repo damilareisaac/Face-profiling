@@ -6,7 +6,7 @@ import time
 import numpy as np
 from models import AgeModel, GenderModel, RaceModel
 from config import FONT_SIZE, STEP, TEXT_THICKNESS
-
+from skin_tone.main import main as skin_tone
 
 cv2.namedWindow("Image Profile")
 camera = cv2.VideoCapture(0)
@@ -64,6 +64,8 @@ def add_rectangular_profile_box_to_face(profiles: List[Any], frame):
 
         return frame
 
+
+skin_tone()
 
 while True:
     start_time = time.time()
