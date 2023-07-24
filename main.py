@@ -7,9 +7,8 @@ import time
 import numpy as np
 from models import AgeModel, GenderModel, RaceModel
 from config import FONT_SIZE, STEP, TEXT_THICKNESS
-from skin_tone.main import main as skin_tone
-from utils import build_filenames_from_paths
-
+from utils import build_filenames_from_paths, set_scale_attribute, show
+from skin_tone import process_image
 
 face_rec = f_face_recognition.rec()
 age_model = AgeModel()
@@ -18,6 +17,8 @@ race_model = RaceModel()
 
 args = build_arguments()
 type_input = args.input
+
+set_scale_attribute()
 
 
 def get_profile(frame):
@@ -74,11 +75,10 @@ if type_input == "image":
         frame = cv2.imread(str(image))
         profiles = get_profile(frame)
         annotated_images = add_rectangular_profile_box_to_face(profiles, frame)
-        cv2.imshow("Face info", annotated_images)
-
-    skin_tone()
-    cv2.waitKey(0)
-
+        show(annotated_images)
+    for result in map(process_image, file_names):
+        records = result.get("records")
+        print(records)
 
 if type_input == "webcam":
     cv2.namedWindow("Image Profile")
@@ -103,7 +103,4 @@ if type_input == "webcam":
             (0, 0, 255),
             2,
         )
-        cv2.imshow("Face info", frame)
-
-        if cv2.waitKey(1) & 0xFF == ord("q"):
-            break
+        show(frame)

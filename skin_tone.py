@@ -1,31 +1,41 @@
-import logging
 import math
 import sys
-
 import cv2
 import numpy as np
 from colormath.color_conversions import convert_color
 from colormath.color_diff import delta_e_cie2000
 from colormath.color_objects import sRGBColor, LabColor
 
-LOG = logging.getLogger(__name__)
+from arg_parser.input_parser import build_arguments
+from config import TONE_BLACK_WHITE, TONE_COLOURS
+from utils import alphabet_id
 
 
-def process_image(
-    filename,
-    image_type_setting,
-    specified_palette,
-    default_palette,
-    specified_tone_labels,
-    default_tone_labels,
-    to_bw,
-    new_width,
-    n_dominant_colors,
-    scale,
-    min_nbrs,
-    min_size,
-    verbose,
-):
+def process_image(filename):
+    args = build_arguments()
+    image_type_setting = args.image_type
+    to_bw: bool = args.black_white
+    default_tone_palette = dict(color=TONE_COLOURS, bw=TONE_BLACK_WHITE)
+    specified_palette: list[str] = args.palette if args.palette is not None else []
+    default_tone_labels = {
+        "color": [
+            "C" + alphabet_id(i) for i in range(len(default_tone_palette["color"]))
+        ],
+        "bw": ["B" + alphabet_id(i) for i in range(len(default_tone_palette["bw"]))],
+    }
+    verbose = args.debug
+    specified_tone_labels = args.labels
+    new_width = args.new_width
+    n_dominant_colors = args.n_colors
+    min_size = args.min_size[:2]
+    scale = args.scale
+    min_nbrs = args.min_nbrs
+
+    for idx, ct in enumerate(specified_palette):
+        if not ct.startswith("#") and len(ct.split(",")) == 3:
+            r, g, b = ct.split(",")
+            specified_palette[idx] = "#%02X%02X%02X" % (int(r), int(g), int(b))
+
     basename, extension = filename.stem, filename.suffix
 
     image: np.ndarray = cv2.imread(str(filename.resolve()), cv2.IMREAD_COLOR)
@@ -42,7 +52,7 @@ def process_image(
     if image_type == "auto":
         image_type = "bw" if is_bw else "color"
     if len(specified_palette) == 0:
-        skin_tone_palette = default_palette["bw" if to_bw or is_bw else "color"]
+        skin_tone_palette = default_tone_palette["bw" if to_bw or is_bw else "color"]
     else:
         skin_tone_palette = specified_palette
 
@@ -470,12 +480,6 @@ def process(
         report_images[idx + 1] = report_image
 
     return records, report_images
-
-
-def show(image):
-    cv2.imshow("image", image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
 
 
 def face_report_image(face, idx, image):

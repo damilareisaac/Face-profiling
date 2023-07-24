@@ -2,6 +2,8 @@ import functools
 import glob
 import os
 import re
+import cv2
+import numpy as np
 import string
 import sys
 from pathlib import Path
@@ -47,3 +49,17 @@ def sort_file(filename: Path):
 
 def is_windows():
     return sys.platform in ["win32", "cygwin"]
+
+
+def patch_asscalar(a):
+    return np.asarray(a).item()
+
+
+def set_scale_attribute():
+    return setattr(np, "asscalar", patch_asscalar)
+
+
+def show(image):
+    cv2.imshow("image", image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
