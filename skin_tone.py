@@ -41,7 +41,6 @@ def process_image(img_frame, basename=None, extension=None):
 
     if img_frame is None:
         msg = f"{basename}.{extension} is not found or is not a valid image."
-        LOG.warning(msg)
         return {
             "basename": basename,
             "extension": extension,
@@ -88,7 +87,6 @@ def process_image(img_frame, basename=None, extension=None):
         }
     except Exception as e:
         msg = f"Error processing image {basename}: {str(e)}"
-        LOG.error(msg)
         return {
             "basename": basename,
             "extension": extension,

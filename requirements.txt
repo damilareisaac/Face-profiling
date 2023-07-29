@@ -2,6 +2,8 @@ deepface
 face-recognition
 face-recognition-models
 imutils
-Keras
+Keras==2.13.1
 Keras-Preprocessing
 opencv-python
+colormath
+tensorflow==2.13.0

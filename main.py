@@ -85,8 +85,9 @@ if type_input == "image":
     file_names = build_filenames_from_paths(args.images)
     file_path = file_names[0]
     frame = cv2.imread(str(file_path.resolve()))
-    profiles = get_profile(frame)
-    annotated_images = add_rectangular_profile_box_to_face(profiles, frame)
+    profile = get_profile(frame)
+    print(profile)
+    annotated_images = add_rectangular_profile_box_to_face(profile, frame)
     show(annotated_images)
 
 if type_input == "webcam":
@@ -100,8 +101,8 @@ if type_input == "webcam":
         end_time = time.time() - start_time
         FPS = 1 / end_time
 
-        profiles = get_profile(frame)
-        annotated_images = add_rectangular_profile_box_to_face(profiles, frame)
+        profile = get_profile(frame)
+        annotated_images = add_rectangular_profile_box_to_face(profile, frame)
         cv2.putText(
             frame,
             f"FPS: {round(FPS,3)}",
