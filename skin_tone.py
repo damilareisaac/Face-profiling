@@ -1,5 +1,5 @@
 import math
-import sys
+
 import cv2
 import numpy as np
 from colormath.color_conversions import convert_color
@@ -10,44 +10,49 @@ from arg_parser.input_parser import build_arguments
 from config import TONE_BLACK_WHITE, TONE_COLOURS
 from utils import alphabet_id
 
-args = build_arguments()
-verbose = args.debug
 
-image_type_setting = args.image_type
-to_bw: bool = args.black_white
-default_tone_palette = dict(color=TONE_COLOURS, bw=TONE_BLACK_WHITE)
-specified_palette: list[str] = args.palette if args.palette is not None else []
-default_tone_labels = {
-    "color": ["C" + alphabet_id(i) for i in range(len(default_tone_palette["color"]))],
-    "bw": ["B" + alphabet_id(i) for i in range(len(default_tone_palette["bw"]))],
-}
+def process_image(img_frame, basename=None, extension=None):
+    args = build_arguments()
 
-specified_tone_labels = args.labels
-new_width = args.new_width
-n_dominant_colors = args.n_colors
-min_size = args.min_size[:2]
-scale = args.scale
-min_nbrs = args.min_nbrs
+    verbose: bool = args.debug
+    to_bw: bool = args.black_white
 
+    default_tone_palette = {"color": TONE_COLOURS, "bw": TONE_BLACK_WHITE}
 
-def process_image(filename):
+    default_palette = default_tone_palette.copy()
+    specified_palette: list[str] = args.palette if args.palette is not None else []
+
+    default_tone_labels = {
+        "color": [
+            "C" + alphabet_id(i) for i in range(len(default_tone_palette["color"]))
+        ],
+        "bw": ["B" + alphabet_id(i) for i in range(len(default_tone_palette["bw"]))],
+    }
+    specified_tone_labels = args.labels
+
     update_specified_palette(specified_palette)
-    basename, extension = filename.stem, filename.suffix
-    image: np.ndarray = cv2.imread(str(filename.resolve()), cv2.IMREAD_COLOR)
-    if image is None:
+
+    new_width = args.new_width
+    n_dominant_colors = args.n_colors
+    min_size = args.min_size[:2]
+    scale = args.scale
+    min_nbrs = args.min_nbrs
+    image_type_setting = args.image_type
+
+    if img_frame is None:
         msg = f"{basename}.{extension} is not found or is not a valid image."
-        print(msg, file=sys.stderr)
+        LOG.warning(msg)
         return {
             "basename": basename,
             "extension": extension,
             "message": msg,
         }
-    is_bw = is_black_white(image)
+    is_bw = is_black_white(img_frame)
     image_type = image_type_setting
     if image_type == "auto":
         image_type = "bw" if is_bw else "color"
     if len(specified_palette) == 0:
-        skin_tone_palette = default_tone_palette["bw" if to_bw or is_bw else "color"]
+        skin_tone_palette = default_palette["bw" if to_bw or is_bw else "color"]
     else:
         skin_tone_palette = specified_palette
 
@@ -62,7 +67,7 @@ def process_image(filename):
 
     try:
         records, report_images = process(
-            image,
+            img_frame,
             is_bw,
             to_bw,
             skin_tone_palette,
@@ -83,7 +88,7 @@ def process_image(filename):
         }
     except Exception as e:
         msg = f"Error processing image {basename}: {str(e)}"
-        print(msg, file=sys.stderr)
+        LOG.error(msg)
         return {
             "basename": basename,
             "extension": extension,
@@ -482,6 +487,12 @@ def process(
         report_images[idx + 1] = report_image
 
     return records, report_images
+
+
+def show(image):
+    cv2.imshow("image", image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 
 def face_report_image(face, idx, image):
