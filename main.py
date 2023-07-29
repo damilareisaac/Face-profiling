@@ -42,7 +42,6 @@ def get_profile(img_frame):
 
             if tone_result:
                 tone_result_list = list(tone_result.get("records").values())[0]
-                print(tone_result)
                 face_features["dominant color proportion"] = tone_result_list[1]
                 face_features["dominant color"] = tone_result_list[0]
 
